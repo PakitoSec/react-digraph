@@ -24,10 +24,13 @@ button {
   margin-right: 10px;
 }
 
+.main-graph-wrapper {
+  height: 100%;
+}
+
 #graph {
   height: 100%;
   width: 100%;
-  display: flex;
 }
 
 .total-nodes {

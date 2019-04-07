@@ -20,23 +20,111 @@ $dark-color: black;
 $light-grey: lightgrey;
 $background-color: #f9f9f9;
 
-.view-wrapper {
-  height: 100%;
-  width: 100%;
-  margin: 0;
-  display: flex;
-  box-shadow: none;
-  background: $background-color;
-  transition: opacity 0.167s;
-  opacity: 1;
-  outline: none;
-  user-select: none;
 
-  > .graph {
-    align-content: stretch;
-    flex: 1;
-    width: 100%;
+.main-graph-wrapper {
+  height: 100%;
+
+  .graph-minimap-wrapper {
+    float: right;
+    width: 250px;
+    min-height: 250px;
+  
+    > #minimap {
+      width: 250px;
+      .edge {
+        cursor: default;
+        .edge-text {
+          cursor: default;
+        }
+      }
+      .node {
+        .shape {
+          > use.node {
+            cursor: default;
+          }
+        }
+        .node-text {
+          cursor: default;
+        }    
+      }    
+    }
+    .slider-rect {
+      fill: #000;
+      border: 1px solid black;
+      opacity: 0.1;
+      cursor: default;
+      z-index: 5000;
+    }
+  }
+
+  .view-wrapper {
     height: 100%;
+    margin: 0;
+    display: flex;
+    box-shadow: none;
+    background: $background-color;
+    transition: opacity 0.167s;
+    opacity: 1;
+    outline: none;
+    user-select: none;
+    overflow: hidden;
+    min-height: 50px;
+
+    > .graph {
+      align-content: stretch;
+      flex: 1;
+      width: 100%;
+      height: 100%;
+    }
+
+    .graph-controls {
+      position: absolute;
+      bottom: 30px;
+      left: 15px;
+      z-index: 100;
+      display: grid;
+      grid-template-columns: auto auto;
+      grid-gap: 15px;
+      align-items: center;
+      user-select: none;
+
+      > .slider-wrapper {
+        background-color: white;
+        color: $primary-color;
+        border: solid 1px lightgray;
+        padding: 6.5px;
+        border-radius: 2px;
+
+        > span {
+          display: inline-block;
+          vertical-align: top;
+          margin-top: 2px;
+        }
+
+        > .slider {
+          position: relative;
+          margin-left: 4px;
+          margin-right: 4px;
+          cursor: pointer;
+        }
+      }
+
+      > .slider-button {
+        background-color: white;
+        fill: $primary-color;
+        border: solid 1px lightgray;
+        outline: none;
+        width: 31px;
+        height: 31px;
+        border-radius: 2px;
+        cursor: pointer;
+        margin: 0;
+      }
+    }
+
+    .circle {
+      fill: $light-grey;
+    }
   }
 
   .node {
@@ -113,54 +201,5 @@ $background-color: #f9f9f9;
 
   .arrow {
     fill: $primary-color;
-  }
-
-  .graph-controls {
-    position: absolute;
-    bottom: 30px;
-    left: 15px;
-    z-index: 100;
-    display: grid;
-    grid-template-columns: auto auto;
-    grid-gap: 15px;
-    align-items: center;
-    user-select: none;
-
-    > .slider-wrapper {
-      background-color: white;
-      color: $primary-color;
-      border: solid 1px lightgray;
-      padding: 6.5px;
-      border-radius: 2px;
-
-      > span {
-        display: inline-block;
-        vertical-align: top;
-        margin-top: 2px;
-      }
-
-      > .slider {
-        position: relative;
-        margin-left: 4px;
-        margin-right: 4px;
-        cursor: pointer;
-      }
-    }
-
-    > .slider-button {
-      background-color: white;
-      fill: $primary-color;
-      border: solid 1px lightgray;
-      outline: none;
-      width: 31px;
-      height: 31px;
-      border-radius: 2px;
-      cursor: pointer;
-      margin: 0;
-    }
-  }
-
-  .circle {
-    fill: $light-grey;
   }
 }

@@ -27,6 +27,7 @@ import Background from './background';
 import Defs from './defs';
 import Edge, { type IEdge, type ITargetPosition } from './edge';
 import GraphControls from './graph-controls';
+import GraphMinimap from './graph-minimap';
 import GraphUtils, { type INodeMapNode } from './graph-util';
 import Node, { type INode, type IPoint } from './node';
 import { Transform } from 'stream';
@@ -128,6 +129,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
   entities: any;
   selectedView: any;
   view: any;
+  graphMinimap: any;
   graphControls: any;
   layoutEngine: any;
 
@@ -140,6 +142,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     this.renderEdgesTimeout = null;
     this.viewWrapper = React.createRef();
     this.graphControls = React.createRef();
+    this.graphMinimap = React.createRef();
     this.graphSvg = React.createRef();
 
     if (props.layoutEngineType) {
@@ -192,10 +195,10 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     // On the initial load, the 'view' <g> doesn't exist until componentDidMount.
     // Manually render the first view.
     this.renderView();
-
     setTimeout(() => {
       if (this.viewWrapper != null) {
         this.handleZoomToFit();
+        this.renderMinimap()
       }
     }, this.props.zoomDelay);
   }
@@ -246,6 +249,8 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     // add new edges
     this.addNewEdges(this.state.edges, prevState.edgesMap, selectedEdgeObj, prevState.selectedEdgeObj, forceReRender);
 
+    this.renderMinimap()
+
     this.setState({
       componentUpToDate: true
     });
@@ -257,6 +262,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
   }
 
   getEdgeBySourceTarget(source: string, target: string): IEdge | null {
+
     return this.state.edgesMap ? this.state.edgesMap[`${source}_${target}`] : null;
   }
 
@@ -571,7 +577,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
       return;
     }
     const node = nodeMapNode.node;
-
+    
     if (readOnly) {
       return;
     }
@@ -588,6 +594,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
       this.syncRenderEdge({ source: nodeId, targetPosition: position });
       this.setState({ draggingEdge: true });
     }
+    this.renderMinimap()
   }
 
   createNewEdge() {
@@ -632,7 +639,6 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     if (readOnly) {
       return;
     }
-
     // Detect if edge is being drawn and link to hovered node
     // This will handle a new edge
     if (shiftKey) {
@@ -825,7 +831,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
 
     if (!draggingEdge) {
       d3.select(this.view).attr('transform', transform);
-
+      this.handleMinimapZoom(transform)
       // prevent re-rendering on zoom
       if (this.state.viewTransform !== transform) {
         this.setState({
@@ -905,6 +911,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
   handleZoomToFit = () => {
     const parent = d3.select(this.viewWrapper.current).node();
     const entities = d3.select(this.entities).node();
+    if (!entities) { return; }
     const viewBBox = entities.getBBox ? entities.getBBox() : null;
     if (!viewBBox) { return; }
 
@@ -982,7 +989,6 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
   // Programmatically resets zoom
   setZoom(k: number = 1, x: number = 0, y: number = 0, dur: number = 0) {
     const t = d3.zoomIdentity.translate(x, y).scale(k);
-
     d3
       .select(this.viewWrapper.current)
       .select('svg')
@@ -1040,7 +1046,6 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     }
     const containerId = `${id}-container`;
     let nodeContainer: HTMLElement | Element | null = document.getElementById(containerId);
-
     if (!nodeContainer) {
       nodeContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       nodeContainer.id = containerId;
@@ -1057,7 +1062,6 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     if (this.state.draggingEdge) {
       return;
     }
-
     node.incomingEdges.forEach((edge) => {
       this.asyncRenderEdge(edge, nodeMoving);
     });
@@ -1090,7 +1094,6 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     if (!this.entities) {
       return;
     }
-
     this.state.nodes.forEach((node, i) => {
       this.asyncRenderNode(node);
     });
@@ -1110,7 +1113,6 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     const targetNode = targetNodeMapNode ? targetNodeMapNode.node : null;
     const targetPosition = edge.targetPosition;
     const { edgeTypes, edgeHandleSize, nodeSize, nodeKey} = this.props;
-
     return (
       <Edge
         data={edge}
@@ -1125,7 +1127,6 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
       />
     );
   }
-
 
   renderEdge = (id: string, element: any, edge: IEdge, nodeMoving: boolean = false) => {
     if (!this.entities) {
@@ -1179,7 +1180,6 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     if (!edge.source) {
       return;
     }
-
     // We have to use the 'custom' id when we're drawing a new node
     const idVar = edge.target ? `${edge.source}-${edge.target}` : 'custom';
     const id = `edge-${idVar}`;
@@ -1195,6 +1195,38 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     }
     for (let i = 0; i < edges.length; i++){
       this.asyncRenderEdge(edges[i]);
+    }
+  }
+
+  handleMinimapZoom = (transform) => {
+    if (this.viewWrapper.current) {
+      const viewBBox = this.entities.getBBox ? this.entities.getBBox() : null;
+      const width = this.viewWrapper.current.clientWidth;
+      let height = this.viewWrapper.current.clientHeight
+      let dx = transform.x / transform.k;
+      let dy = transform.y / transform.k;
+      var svg = d3.select('#minimap > svg > rect')
+      svg.remove()
+      var svg = d3.select('#minimap > svg')
+      svg.append('rect')
+        .attr('id', 'minimapRect')
+        .attr('class', 'slider-rect')
+        .attr('width', width / transform.k )
+        .attr('height', height / transform.k )
+        .attr('z-index', -100)
+        .attr('transform', `translate(${-dx},${-dy})`);
+    }
+  }
+
+  renderMinimap = () => {
+    if (this.viewWrapper.current) {
+      ReactDOM.render(
+          <GraphMinimap
+            viewWrapper={this.viewWrapper}
+            entities={this.entities}
+          />,
+          this.graphMinimap.current
+        );
     }
   }
 
@@ -1228,27 +1260,30 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
   render() {
     const { edgeArrowSize, gridSpacing, gridDotSize, nodeTypes, nodeSubtypes, edgeTypes, renderDefs } = this.props;
     return (
-      <div
-        className="view-wrapper"
-        ref={this.viewWrapper}
-      >
-        <svg className="graph" ref={this.graphSvg}>
-          <Defs
-            edgeArrowSize={edgeArrowSize}
-            gridSpacing={gridSpacing}
-            gridDotSize={gridDotSize}
-            nodeTypes={nodeTypes}
-            nodeSubtypes={nodeSubtypes}
-            edgeTypes={edgeTypes}
-            renderDefs={renderDefs}
-          />
-          <g className="view" ref={(el) => (this.view = el)}>
-            {this.renderBackground()}
+      <div className="main-graph-wrapper">
+        <div className="graph-minimap-wrapper" ref={this.graphMinimap} />
+        <div
+          className="view-wrapper"
+          ref={this.viewWrapper}
+        >
+          <svg className="graph" ref={this.graphSvg}>
+            <Defs
+              edgeArrowSize={edgeArrowSize}
+              gridSpacing={gridSpacing}
+              gridDotSize={gridDotSize}
+              nodeTypes={nodeTypes}
+              nodeSubtypes={nodeSubtypes}
+              edgeTypes={edgeTypes}
+              renderDefs={renderDefs}
+            />
+            <g className="view" ref={(el) => (this.view = el)} >
+              {this.renderBackground()}
 
-            <g className="entities" ref={(el) => (this.entities = el)} />
-          </g>
-        </svg>
-        <div className="graph-controls-wrapper" />
+              <g className="entities" ref={(el) => (this.entities = el)} />
+            </g>
+          </svg>
+          <div className="graph-controls-wrapper" />
+        </div>
       </div>
     );
   }

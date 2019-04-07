@@ -105,7 +105,7 @@ describe('GraphView component', () => {
 
   describe('render method', () => {
     it('renders', () => {
-      expect(output.props().className).toEqual('view-wrapper');
+      expect(output.props().className).toEqual('main-graph-wrapper');
 
       expect(output.find('.graph-controls-wrapper').length).toEqual(1);
 
