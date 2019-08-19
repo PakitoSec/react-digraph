@@ -26,6 +26,7 @@ import Background from './background';
 import Defs from './defs';
 import Edge, { type IEdge } from './edge';
 import GraphControls from './graph-controls';
+import GraphMinimap from './graph-minimap';
 import GraphUtils, { type INodeMapNode } from '../utilities/graph-util';
 import Node, { type INode, type IPoint } from './node';
 
@@ -146,6 +147,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
   entities: any;
   selectedView: any;
   view: any;
+  graphMinimap: any;
   graphControls: any;
   layoutEngine: any;
 
@@ -158,6 +160,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     this.renderEdgesTimeout = null;
     this.viewWrapper = React.createRef();
     this.graphControls = React.createRef();
+    this.graphMinimap = React.createRef();
     this.graphSvg = React.createRef();
 
     if (props.layoutEngineType) {
@@ -222,6 +225,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     setTimeout(() => {
       if (this.viewWrapper.current != null) {
         this.handleZoomToFit();
+        this.renderMinimap()
       }
     }, zoomDelay);
   }
@@ -294,6 +298,8 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
       prevState.selectedEdgeObj,
       forceReRender
     );
+
+    this.renderMinimap()
 
     this.setState({
       componentUpToDate: true,
@@ -692,7 +698,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     }
 
     const node = nodeMapNode.node;
-
+    
     if (readOnly) {
       return;
     }
@@ -713,6 +719,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
       this.syncRenderEdge({ source: nodeId, targetPosition: position });
       this.setState({ draggingEdge: true });
     }
+    this.renderMinimap()
   };
 
   createNewEdge() {
@@ -761,7 +768,6 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     if (readOnly) {
       return;
     }
-
     // Detect if edge is being drawn and link to hovered node
     // This will handle a new edge
     if (shiftKey) {
@@ -986,7 +992,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
 
     if (!draggingEdge) {
       d3.select(this.view).attr('transform', transform);
-
+      this.handleMinimapZoom(transform)
       // prevent re-rendering on zoom
       if (this.state.viewTransform !== transform) {
         this.setState(
@@ -1175,6 +1181,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     const t = d3.zoomIdentity.translate(x, y).scale(k);
 
     d3.select(this.viewWrapper.current)
+
       .select('svg')
       .transition()
       .duration(dur)
@@ -1292,7 +1299,6 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     if (this.state.draggingEdge) {
       return;
     }
-
     node.incomingEdges.forEach(edge => {
       this.asyncRenderEdge(edge, nodeMoving);
     });
@@ -1409,7 +1415,6 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     if (!edge.source) {
       return;
     }
-
     // We have to use the 'custom' id when we're drawing a new node
     const idVar = edge.target ? `${edge.source}-${edge.target}` : 'custom';
     const id = `edge-${idVar}`;
@@ -1429,6 +1434,38 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
       this.asyncRenderEdge(edges[i]);
     }
   };
+
+  handleMinimapZoom = (transform) => {
+    if (this.viewWrapper.current) {
+      const viewBBox = this.entities.getBBox ? this.entities.getBBox() : null;
+      const width = this.viewWrapper.current.clientWidth;
+      let height = this.viewWrapper.current.clientHeight
+      let dx = transform.x / transform.k;
+      let dy = transform.y / transform.k;
+      var svg = d3.select('#minimap > svg > rect')
+      svg.remove()
+      var svg = d3.select('#minimap > svg')
+      svg.append('rect')
+        .attr('id', 'minimapRect')
+        .attr('class', 'slider-rect')
+        .attr('width', width / transform.k )
+        .attr('height', height / transform.k )
+        .attr('z-index', -100)
+        .attr('transform', `translate(${-dx},${-dy})`);
+    }
+  }
+
+  renderMinimap = () => {
+    if (this.viewWrapper.current) {
+      ReactDOM.render(
+          <GraphMinimap
+            viewWrapper={this.viewWrapper}
+            entities={this.entities}
+          />,
+          this.graphMinimap.current
+        );
+    }
+  }
 
   /*
    * GraphControls is a special child component. To maximize responsiveness we disable
@@ -1480,31 +1517,33 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     } = this.props;
 
     return (
-      <div className="view-wrapper" ref={this.viewWrapper}>
-        <svg className="graph" ref={this.graphSvg}>
-          <Defs
-            edgeArrowSize={edgeArrowSize}
-            gridSpacing={gridSpacing}
-            gridDotSize={gridDotSize}
-            nodeTypes={nodeTypes}
-            nodeSubtypes={nodeSubtypes}
-            edgeTypes={edgeTypes}
-            renderDefs={renderDefs}
-          />
-          <g className="view" ref={el => (this.view = el)}>
-            <Background
-              gridSize={gridSize}
-              backgroundFillId={backgroundFillId}
-              renderBackground={renderBackground}
-            />
-
-            <g className="entities" ref={el => (this.entities = el)} />
-          </g>
-        </svg>
+      <div className="main-graph-wrapper">
+        <div className="graph-minimap-wrapper" ref={this.graphMinimap} />
         <div
-          id="react-digraph-graph-controls-wrapper"
-          className="graph-controls-wrapper"
-        />
+          className="view-wrapper"
+          ref={this.viewWrapper}
+        >
+          <svg className="graph" ref={this.graphSvg}>
+            <Defs
+              edgeArrowSize={edgeArrowSize}
+              gridSpacing={gridSpacing}
+              gridDotSize={gridDotSize}
+              nodeTypes={nodeTypes}
+              nodeSubtypes={nodeSubtypes}
+              edgeTypes={edgeTypes}
+              renderDefs={renderDefs}
+            />
+            <g className="view" ref={(el) => (this.view = el)} >
+              <Background
+                gridSize={gridSize}
+                backgroundFillId={backgroundFillId}
+                renderBackground={renderBackground}
+              />
+              <g className="entities" ref={(el) => (this.entities = el)} />
+            </g>
+          </svg>
+          <div className="graph-controls-wrapper" />
+        </div>
       </div>
     );
   }
