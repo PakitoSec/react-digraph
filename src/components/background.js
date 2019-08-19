@@ -18,18 +18,24 @@
 import * as React from 'react';
 
 type IBackgroundProps = {
-  gridSize?: number;
-  backgroundFillId?: string;
+  gridSize?: number,
+  backgroundFillId?: string,
+  renderBackground?: (gridSize?: number) => any,
 };
 
 class Background extends React.Component<IBackgroundProps> {
   static defaultProps = {
     backgroundFillId: '#grid',
-    gridSize: 40960
+    gridSize: 40960,
   };
 
   render() {
-    const { gridSize, backgroundFillId } = this.props;
+    const { gridSize, backgroundFillId, renderBackground } = this.props;
+
+    if (renderBackground != null) {
+      return renderBackground(gridSize);
+    }
+
     return (
       <rect
         className="background"

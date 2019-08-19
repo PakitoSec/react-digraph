@@ -14,8 +14,7 @@
   limitations under the License.
 */
 
-declare module "react-digraph" {
-
+declare module 'react-digraph' {
   export type INode = {
     title: string;
     x?: number | null;
@@ -67,6 +66,7 @@ declare module "react-digraph" {
     target: string;
     type?: string;
     handleText?: string;
+    handleTooltipText?: string;
     [key: string]: any;
   };
 
@@ -117,7 +117,7 @@ declare module "react-digraph" {
     canDeleteNode?: (selected: any) => boolean;
     onCopySelected?: () => void;
     onCreateEdge: (sourceNode: INode, targetNode: INode) => void;
-    onCreateNode: (x: number, y: number) => void;
+    onCreateNode: (x: number, y: number, event: any) => void;
     onDeleteEdge: (selectedEdge: IEdge, edges: IEdge[]) => void;
     onDeleteNode: (selected: any, nodeId: string, nodes: any[]) => void;
     onPasteSelected?: () => void;
@@ -172,7 +172,7 @@ declare module "react-digraph" {
     static revert(graphInput: IGraphInput): any;
   }
 
-  export type LayoutEngineType = "None" | "SnapToGrid" | "VerticalTree";
+  export type LayoutEngineType = 'None' | 'SnapToGrid' | 'VerticalTree';
 
   export const GraphView: React.ComponentClass<IGraphViewProps>;
   export type INodeMapNode = {
@@ -218,5 +218,7 @@ declare module "react-digraph" {
     ): void;
 
     static hasNodeShallowChanged(prevNode: INode, newNode: INode): boolean;
+
+    static isEqual(prevNode: any, newNode: any): boolean;
   }
 }

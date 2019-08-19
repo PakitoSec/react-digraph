@@ -1,3 +1,20 @@
+**v6.5.0** - August 7, 2019
+- PR #148 - Asynchronous Fast rendering
+- PR #157 - Added data-intersect-ignore property to node SVG to prevent intersection calculaton from selecting the wrong element.
+- PR #159 - Resolved #158 - Add tooltip for edges
+
+**v6.4.0** - July 11, 2019
+- PR #145 - Fix 'Cannot read property 'getBBox' of null' error when remounting  (@ksnyder9801) - https://github.com/uber/react-digraph/pull/145
+- PR #139 - Added eslint rules and fixed code. (@ajbogh) - https://github.com/uber/react-digraph/pull/139
+- PR #136 - Add horizontal layotu engine (@wfriebel) - https://github.com/uber/react-digraph/pull/136
+- PR #134 - Resolved #114 - maxTitleChars property is not being used (@thesuperhomie) - https://github.com/uber/react-digraph/pull/134
+- PR #131 - Fix expected params in handleDragEnd test (@ksnyder9801) - https://github.com/uber/react-digraph/pull/131
+
+
+**v6.3.0** - May 21, 2019
+- PR #130 - Added code to return the d3 event on node selection (@ajbogh) - https://github.com/uber/react-digraph/pull/130
+- PR #129 - Add panToNode/panToEdge imperative methods (@ksnyder9801) - https://github.com/uber/react-digraph/pull/129
+
 **v6.2.0** - Feb 26, 2019
 - PR #99 - Avoid creating orphan edges (@iamsoorena) - https://github.com/uber/react-digraph/pull/99
 - PR #109 - Only import the expand icon (@rileyhilliard) - https://github.com/uber/react-digraph/pull/109
