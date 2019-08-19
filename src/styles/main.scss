@@ -202,4 +202,53 @@ $background-color: #f9f9f9;
   .arrow {
     fill: $primary-color;
   }
+ 
+  .graph-controls {
+    position: absolute;
+    bottom: 30px;
+    left: 15px;
+    z-index: 100;
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-gap: 15px;
+    align-items: center;
+    user-select: none;
+
+    > .slider-wrapper {
+      background-color: white;
+      color: $primary-color;
+      border: solid 1px lightgray;
+      padding: 6.5px;
+      border-radius: 2px;
+
+      > span {
+        display: inline-block;
+        vertical-align: top;
+        margin-top: 4px;
+      }
+
+      > .slider {
+        position: relative;
+        margin-left: 4px;
+        margin-right: 4px;
+        cursor: pointer;
+      }
+    }
+
+    > .slider-button {
+      background-color: white;
+      fill: $primary-color;
+      border: solid 1px lightgray;
+      outline: none;
+      width: 31px;
+      height: 31px;
+      border-radius: 2px;
+      cursor: pointer;
+      margin: 0;
+    }
+  }
+
+  .circle {
+    fill: $light-grey;
+  }
 }

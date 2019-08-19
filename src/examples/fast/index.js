@@ -22,18 +22,17 @@
 import * as React from 'react';
 
 import {
-  GraphView,
+  GraphViewFast,
   type IEdgeType as IEdge,
   type INodeType as INode,
   type LayoutEngineType,
-} from '../';
+} from '../../';
 import GraphConfig, {
   edgeTypes,
   EMPTY_EDGE_TYPE,
   EMPTY_TYPE,
   NODE_KEY,
   nodeTypes,
-  COMPLEX_CIRCLE_TYPE,
   POLY_TYPE,
   SPECIAL_CHILD_SUBTYPE,
   SPECIAL_EDGE_TYPE,
@@ -53,14 +52,12 @@ const sample: IGraph = {
   edges: [
     {
       handleText: '5',
-      handleTooltipText: '5',
       source: 'start1',
       target: 'a1',
       type: SPECIAL_EDGE_TYPE,
     },
     {
       handleText: '5',
-      handleTooltipText: 'This edge connects Node A and Node B',
       source: 'a1',
       target: 'a2',
       type: SPECIAL_EDGE_TYPE,
@@ -163,13 +160,6 @@ const sample: IGraph = {
       type: POLY_TYPE,
       x: 0,
       y: 300,
-    },
-    {
-      id: 'a8',
-      title: 'Node G (8)',
-      type: COMPLEX_CIRCLE_TYPE,
-      x: -200,
-      y: 400,
     },
   ],
 };
@@ -532,7 +522,7 @@ class Graph extends React.Component<IGraphProps, IGraphState> {
             </select>
           </div>
         </div>
-        <GraphView
+        <GraphViewFast
           ref={el => (this.GraphView = el)}
           nodeKey={NODE_KEY}
           nodes={nodes}
