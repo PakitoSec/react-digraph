@@ -43,6 +43,7 @@ export type IGraphViewProps = {
   readOnly?: boolean;
   selected: any;
   showGraphControls?: boolean;
+  showMinimap?: boolean;
   zoomDelay?: number;
   zoomDur?: number;
   canCreateEdge?: (startNode?:INode, endNode?:INode) => boolean;

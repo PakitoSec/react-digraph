@@ -72,6 +72,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     nodeSize: 154,
     readOnly: false,
     showGraphControls: true,
+    showMinimap: true,
     zoomDelay: 1000,
     zoomDur: 750
   };
@@ -215,7 +216,8 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
       !nextState.componentUpToDate ||
       nextProps.selected !== this.props.selected ||
       nextProps.readOnly !== this.props.readOnly ||
-      nextProps.layoutEngineType !== this.props.layoutEngineType
+      nextProps.layoutEngineType !== this.props.layoutEngineType ||
+      nextProps.showMinimap !== this.props.showMinimap
     ) {
       return true;
     }
@@ -1199,7 +1201,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
   }
 
   handleMinimapZoom = (transform) => {
-    if (this.viewWrapper.current) {
+    if (this.props.showMinimap && this.viewWrapper.current) {
       const viewBBox = this.entities.getBBox ? this.entities.getBBox() : null;
       const width = this.viewWrapper.current.clientWidth;
       let height = this.viewWrapper.current.clientHeight
@@ -1219,15 +1221,16 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
   }
 
   renderMinimap = () => {
-    if (this.viewWrapper.current) {
-      ReactDOM.render(
-          <GraphMinimap
-            viewWrapper={this.viewWrapper}
-            entities={this.entities}
-          />,
-          this.graphMinimap.current
-        );
+    if (!this.props.showMinimap || !this.viewWrapper) {
+      return;
     }
+    ReactDOM.render(
+        <GraphMinimap
+          viewWrapper={this.viewWrapper}
+          entities={this.entities}
+        />,
+        this.graphMinimap.current
+      );
   }
 
   /*
@@ -1261,7 +1264,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     const { edgeArrowSize, gridSpacing, gridDotSize, nodeTypes, nodeSubtypes, edgeTypes, renderDefs } = this.props;
     return (
       <div className="main-graph-wrapper">
-        <div className="graph-minimap-wrapper" ref={this.graphMinimap} />
+        { this.props.showMinimap && <div className="graph-minimap-wrapper" ref={this.graphMinimap} />}
         <div
           className="view-wrapper"
           ref={this.viewWrapper}

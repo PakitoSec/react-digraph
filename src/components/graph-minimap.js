@@ -55,7 +55,7 @@ class GraphMinimap extends React.Component {
   }
 
   render() {
-    const width_minimap = 250
+    const width_minimap = 150
 
     return (
         <div id="minimap">
