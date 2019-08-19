@@ -225,7 +225,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     setTimeout(() => {
       if (this.viewWrapper.current != null) {
         this.handleZoomToFit();
-        this.renderMinimap()
+        this.renderMinimap();
       }
     }, zoomDelay);
   }
@@ -299,7 +299,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
       forceReRender
     );
 
-    this.renderMinimap()
+    this.renderMinimap();
 
     this.setState({
       componentUpToDate: true,
@@ -698,7 +698,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     }
 
     const node = nodeMapNode.node;
-    
+
     if (readOnly) {
       return;
     }
@@ -719,7 +719,8 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
       this.syncRenderEdge({ source: nodeId, targetPosition: position });
       this.setState({ draggingEdge: true });
     }
-    this.renderMinimap()
+
+    this.renderMinimap();
   };
 
   createNewEdge() {
@@ -768,6 +769,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     if (readOnly) {
       return;
     }
+
     // Detect if edge is being drawn and link to hovered node
     // This will handle a new edge
     if (shiftKey) {
@@ -992,7 +994,8 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
 
     if (!draggingEdge) {
       d3.select(this.view).attr('transform', transform);
-      this.handleMinimapZoom(transform)
+      this.handleMinimapZoom(transform);
+
       // prevent re-rendering on zoom
       if (this.state.viewTransform !== transform) {
         this.setState(
@@ -1299,6 +1302,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     if (this.state.draggingEdge) {
       return;
     }
+
     node.incomingEdges.forEach(edge => {
       this.asyncRenderEdge(edge, nodeMoving);
     });
@@ -1415,6 +1419,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     if (!edge.source) {
       return;
     }
+
     // We have to use the 'custom' id when we're drawing a new node
     const idVar = edge.target ? `${edge.source}-${edge.target}` : 'custom';
     const id = `edge-${idVar}`;
@@ -1435,37 +1440,39 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     }
   };
 
-  handleMinimapZoom = (transform) => {
+  handleMinimapZoom = transform => {
     if (this.viewWrapper.current) {
-      const viewBBox = this.entities.getBBox ? this.entities.getBBox() : null;
       const width = this.viewWrapper.current.clientWidth;
-      let height = this.viewWrapper.current.clientHeight
-      let dx = transform.x / transform.k;
-      let dy = transform.y / transform.k;
-      var svg = d3.select('#minimap > svg > rect')
-      svg.remove()
-      var svg = d3.select('#minimap > svg')
-      svg.append('rect')
+      const height = this.viewWrapper.current.clientHeight;
+      const dx = transform.x / transform.k;
+      const dy = transform.y / transform.k;
+      let svg = d3.select('#minimap > svg > rect');
+
+      svg.remove();
+      svg = d3.select('#minimap > svg');
+
+      svg
+        .append('rect')
         .attr('id', 'minimapRect')
         .attr('class', 'slider-rect')
-        .attr('width', width / transform.k )
-        .attr('height', height / transform.k )
+        .attr('width', width / transform.k)
+        .attr('height', height / transform.k)
         .attr('z-index', -100)
         .attr('transform', `translate(${-dx},${-dy})`);
     }
-  }
+  };
 
   renderMinimap = () => {
     if (this.viewWrapper.current) {
       ReactDOM.render(
-          <GraphMinimap
-            viewWrapper={this.viewWrapper}
-            entities={this.entities}
-          />,
-          this.graphMinimap.current
-        );
+        <GraphMinimap
+          viewWrapper={this.viewWrapper}
+          entities={this.entities}
+        />,
+        this.graphMinimap.current
+      );
     }
-  }
+  };
 
   /*
    * GraphControls is a special child component. To maximize responsiveness we disable
@@ -1519,10 +1526,7 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
     return (
       <div className="main-graph-wrapper">
         <div className="graph-minimap-wrapper" ref={this.graphMinimap} />
-        <div
-          className="view-wrapper"
-          ref={this.viewWrapper}
-        >
+        <div className="view-wrapper" ref={this.viewWrapper}>
           <svg className="graph" ref={this.graphSvg}>
             <Defs
               edgeArrowSize={edgeArrowSize}
@@ -1533,13 +1537,13 @@ class GraphView extends React.Component<IGraphViewProps, IGraphViewState> {
               edgeTypes={edgeTypes}
               renderDefs={renderDefs}
             />
-            <g className="view" ref={(el) => (this.view = el)} >
+            <g className="view" ref={el => (this.view = el)}>
               <Background
                 gridSize={gridSize}
                 backgroundFillId={backgroundFillId}
                 renderBackground={renderBackground}
               />
-              <g className="entities" ref={(el) => (this.entities = el)} />
+              <g className="entities" ref={el => (this.entities = el)} />
             </g>
           </svg>
           <div className="graph-controls-wrapper" />

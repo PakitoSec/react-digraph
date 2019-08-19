@@ -18,11 +18,10 @@
 /*
   Zoom slider and zoom to fit controls for GraphView
 */
-import * as d3 from 'd3';
 import React from 'react';
 
 class GraphMinimap extends React.Component {
-  graphMinimapSvg
+  graphMinimapSvg;
 
   constructor(props) {
     super(props);
@@ -30,38 +29,45 @@ class GraphMinimap extends React.Component {
   }
 
   renderMinimap() {
-    let data = this.props.entities.cloneNode(true)
-    const viewBBox = this.props.entities.getBBox ? this.props.entities.getBBox() : null;
-    const graphMinimapWrapper = this.graphMinimapSvg.current
-    const height = this.props.viewWrapper.current.clientHeight
-    graphMinimapWrapper.setAttribute('viewBox', [viewBBox.x, viewBBox.y, viewBBox.width, viewBBox.height].join(' '))
-    graphMinimapWrapper.setAttribute('height', height)
-    data.childNodes.forEach(element => {
-      element.id = "minimap_" + element.id
-    });
-    graphMinimapWrapper.prepend(data)
+    const data = this.props.entities.cloneNode(true);
+    const viewBBox = this.props.entities.getBBox
+      ? this.props.entities.getBBox()
+      : null;
+    const graphMinimapWrapper = this.graphMinimapSvg.current;
+    const height = this.props.viewWrapper.current.clientHeight;
 
+    graphMinimapWrapper.setAttribute(
+      'viewBox',
+      [viewBBox.x, viewBBox.y, viewBBox.width, viewBBox.height].join(' ')
+    );
+    graphMinimapWrapper.setAttribute('height', height);
+    data.childNodes.forEach(element => {
+      element.id = 'minimap_' + element.id;
+    });
+    graphMinimapWrapper.prepend(data);
   }
 
   componentDidMount() {
-    this.renderMinimap()
+    this.renderMinimap();
   }
 
   componentDidUpdate(prevProps) {
-    const graphMinimapWrapper = this.graphMinimapSvg.current
-    const graphMinimapWrapperEntities = graphMinimapWrapper.querySelector('.entities')
-    graphMinimapWrapperEntities.remove()
-    this.renderMinimap()
+    const graphMinimapWrapper = this.graphMinimapSvg.current;
+    const graphMinimapWrapperEntities = graphMinimapWrapper.querySelector(
+      '.entities'
+    );
+
+    graphMinimapWrapperEntities.remove();
+    this.renderMinimap();
   }
 
   render() {
-    const width_minimap = 250
+    const width_minimap = 250;
 
     return (
-        <div id="minimap">
-            <svg ref={this.graphMinimapSvg} width={ width_minimap }>
-            </svg>
-        </div>
+      <div id="minimap">
+        <svg ref={this.graphMinimapSvg} width={width_minimap} />
+      </div>
     );
   }
 }
